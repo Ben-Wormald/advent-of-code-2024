@@ -1,10 +1,10 @@
 trait Report {
-    fn is_valid(&self) -> bool;
+    fn is_safe(&self) -> bool;
     fn without(&self, index: usize) -> Self;
 }
 
 impl Report for Vec<usize> {
-    fn is_valid(&self) -> bool {
+    fn is_safe(&self) -> bool {
         let mut reversed = self.clone();
         reversed.reverse();
 
@@ -27,23 +27,23 @@ impl Report for Vec<usize> {
 
 pub fn solve_part_one(input: &str) -> usize {
     get_reports(input)
-        .filter(|report| report.is_valid())
+        .filter(|report| report.is_safe())
         .count()
 }
 
 pub fn solve_part_two(input: &str) -> usize {
     get_reports(input)
         .filter(|report| {
-            let mut is_valid = report.is_valid();
+            let mut is_safe = report.is_safe();
 
             for index in 0..report.len() {
                 let report_without = report.without(index);
-                if report_without.is_valid() {
-                    is_valid = true;
+                if report_without.is_safe() {
+                    is_safe = true;
                 }
             }
 
-            is_valid
+            is_safe
         })
         .count()
 }
