@@ -20,7 +20,7 @@ struct Args {
     test: bool,
 }
 
-day!(day_13);
+day!(day_14);
 
 fn main() {
     dotenv::dotenv().ok();
