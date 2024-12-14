@@ -32,19 +32,21 @@ pub fn solve_part_one(input: &str) -> usize {
 #[allow(non_snake_case)]
 pub fn solve_part_two(input: &str) -> usize {
     get_machines(input).fold(0, |sum, machine| {
-        let A = Matrix2::new(
-            machine.a.0, machine.b.0,
-            machine.a.1, machine.b.1,
-        );
-        let B = Matrix2x1::new(
-            10000000000000.0 + machine.prize.0,
-            10000000000000.0 + machine.prize.1,
-        );
+        let px = machine.prize.0 + 10000000000000.0;
+        let py = machine.prize.1 + 10000000000000.0;
+        let ax = machine.a.0;
+        let ay = machine.a.1;
+        let bx = machine.b.0;
+        let by = machine.b.1;
 
-        let X = A.try_inverse().unwrap() * B;
+        let b = (py * ax - px * ay) / (by * ax - bx * ay);
+        let a = ( px - b * bx) / ax;
 
-        if is_int(X[0]) && is_int(X[1]) {
-            sum + 3 * (X[0].round() as usize) + (X[1].round() as usize)
+        let a_rounded = a.round();
+        let b_rounded = b.round();
+
+        if a_rounded * ax + b_rounded * bx == px && a_rounded * ay + b_rounded * by == py {
+            sum + 3 * (a_rounded as usize) + (b_rounded as usize)
         } else {
             sum
         }
@@ -81,7 +83,7 @@ fn get_machines(input: &str) -> impl Iterator<Item = Machine> + use<'_> {
 
 fn is_int(n: f64) -> bool {
     let fract = n.fract();
-    fract < 1.5e-5 || (fract - 1.0).abs() < 1.5e-5
+    fract < 1e-10 || (fract - 1.0).abs() < 1e-10
 }
 
 #[cfg(test)]
