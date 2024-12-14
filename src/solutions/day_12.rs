@@ -60,7 +60,7 @@ fn get_regions(map: Vec<Vec<char>>) -> Vec<(char, Vec<Coord>)> {
                 )
                 .collect();
 
-            if connected_regions.len() > 0 {
+            if !connected_regions.is_empty() {
                 let (new_region, old_regions) = connected_regions.split_first_mut().unwrap();
 
                 new_region.1.push(plot);
@@ -84,11 +84,17 @@ fn get_price(region: &(char, Vec<Coord>)) -> usize {
     let area = region.len();
 
     let perimeter = region.iter().fold(0, |sum, plot| {
-        let neighbours = region.iter().filter(|p| p.is_adjacent(&plot)).count();
+        let neighbours = region.iter().filter(|p| p.is_adjacent(plot)).count();
         sum + (4 - neighbours)
     });
 
     area * perimeter
+}
+
+#[derive(PartialEq)]
+enum Side {
+    A,
+    B,
 }
 
 fn get_discounted_price(region: &(char, Vec<Coord>)) -> usize {
@@ -96,7 +102,67 @@ fn get_discounted_price(region: &(char, Vec<Coord>)) -> usize {
 
     let area = region.len();
 
-    let sides: usize = todo!();
+    if area == 0 {
+        return 0;
+    }
+
+    let min_x = region.iter().min_by(|plot_a, plot_b| plot_a.0.cmp(&plot_b.0)).unwrap().0 - 1;
+    let min_y = region.iter().min_by(|plot_a, plot_b| plot_a.1.cmp(&plot_b.1)).unwrap().1 - 1;
+
+    let max_x = region.iter().max_by(|plot_a, plot_b| plot_a.0.cmp(&plot_b.0)).unwrap().0 + 1;
+    let max_y = region.iter().max_by(|plot_a, plot_b| plot_a.1.cmp(&plot_b.1)).unwrap().1 + 1;
+
+    let mut sides = 0;
+
+    for x in min_x..max_x {
+        let mut side = None;
+
+        for y in min_y..max_y {
+            let is_plot_a = region.iter().any(|plot| *plot == Coord(x, y));
+            let is_plot_b = region.iter().any(|plot| *plot == Coord(x + 1, y));
+
+            let new_side = match (is_plot_a, is_plot_b) {
+                (true, false) => Some(Side::A),
+                (false, true) => Some(Side::B),
+                _ => None,
+            };
+
+            if side.is_some() && side != new_side {
+                sides += 1;
+            }
+
+            side = new_side;
+        }
+
+        if side.is_some() {
+            sides += 1;
+        }
+    }
+
+    for y in min_y..max_y {
+        let mut side = None;
+
+        for x in min_x..max_x {
+            let is_plot_a = region.iter().any(|plot| *plot == Coord(x, y));
+            let is_plot_b = region.iter().any(|plot| *plot == Coord(x, y + 1));
+
+            let new_side = match (is_plot_a, is_plot_b) {
+                (true, false) => Some(Side::A),
+                (false, true) => Some(Side::B),
+                _ => None,
+            };
+
+            if side.is_some() && side != new_side {
+                sides += 1;
+            }
+
+            side = new_side;
+        }
+
+        if side.is_some() {
+            sides += 1;
+        }
+    }
 
     area * sides
 }
